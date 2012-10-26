@@ -1,3 +1,14 @@
+#include	<unistd.h>
+#include	<stdio.h>
+#include	<stdlib.h>
+#include	<string.h>
+#include	<netinet/ip_icmp.h>
+#include	<netinet/udp.h>
+#include	<netinet/tcp.h>
+#include	<netinet/ip.h>
+#include	<sys/socket.h>
+#include	<arpa/inet.h>
+
 #include	"sniffer.h"
 
 
@@ -40,8 +51,7 @@ void print_tcp_packet(unsigned char* Buffer, int Size, t_sniffer *sniffer)
   iphdrlen = iph->ihl*4;
   
   struct tcphdr *tcph=(struct tcphdr*)(Buffer + iphdrlen);
-  printf("print_tcp_packet() -> (%p)\n", sniffer->logfile);  
-  fprintf(sniffer->logfile,"\n\n***********************TCP Packet*************************\n");
+  //  printf("print_tcp_packet() -> (%p)\n", sniffer->logfile);
   
   print_ip_header(Buffer, Size, sniffer);
   

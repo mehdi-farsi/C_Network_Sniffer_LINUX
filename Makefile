@@ -1,5 +1,7 @@
 NAME	=	network_sniffer
-SRCS	=	main.c
+SRCS	=	main.c		\
+		show_data.c
+
 OBJS	=	$(SRCS:.c=.o)
 CC	=	gcc -o
 CFLAGS	=	-W -Wall

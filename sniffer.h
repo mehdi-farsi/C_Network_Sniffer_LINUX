@@ -18,7 +18,6 @@ typedef struct	s_sniffer
   t_protocol	*prot;
 }		t_sniffer;
 
-
 void ProcessPacket(unsigned char* , int, t_sniffer *);
 void print_ip_header(unsigned char* , int, t_sniffer *);
 void print_tcp_packet(unsigned char* , int, t_sniffer *);
