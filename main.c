@@ -4,9 +4,30 @@
 #include	<string.h>
 #include	<netinet/ip.h>
 #include	<sys/socket.h>
+#include	<fcntl.h>
+#include	<sys/types.h>
+#include	<errno.h>
 
 #include	"sniffer.h"
 #include	"tools.h"
+
+void		command_interpreter()
+{
+  int     mode;
+  int     ret;
+  char    buf[512];
+  int     fd;
+
+  fd = 0;
+  mode = fcntl(fd, F_GETFL, 0);
+  mode |= O_NONBLOCK;
+  fcntl(fd, F_SETFL, mode);
+  ret = read(0, buf, 512);
+  if (ret <= 0)
+    return;
+  else
+    printf(">> %.*s\n", ret, buf);
+}
 
 void		display_time_and_date()
 {
@@ -49,8 +70,10 @@ int		main()
       return (EXIT_FAILURE);
     }
   getting_started();
+ 
   while (1)
     {
+      command_interpreter(); 
       saddr_size = sizeof(saddr);
       data_size = recvfrom(sd, buffer, 65536, 0, &saddr, (socklen_t*)&saddr_size);
       if (data_size < 0)
@@ -94,9 +117,8 @@ void ProcessPacket(unsigned char* buffer, int size, t_sniffer *sniffer)
       ++sniffer->prot->others;
       break;
     }
-  printf("[%s][%s]  TCP : %d   UDP : %d   ICMP : %d   IGMP : %d   Others : %d Total : %d\n",
-	 __DATE__,
-	 __TIME__,
+  display_time_and_date();
+  printf("TCP : %d   UDP : %d   ICMP : %d   IGMP : %d   Others : %d Total : %d\n",
 	 sniffer->prot->tcp, sniffer->prot->udp,
 	 sniffer->prot->icmp, sniffer->prot->igmp,
 	 sniffer->prot->others, sniffer->prot->total);
