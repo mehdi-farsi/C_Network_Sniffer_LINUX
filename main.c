@@ -4,6 +4,7 @@
 #include	<string.h>
 #include	<netinet/ip.h>
 #include	<sys/socket.h>
+#include	<sys/select.h>
 #include	<fcntl.h>
 #include	<sys/types.h>
 #include	<sys/time.h>
@@ -37,7 +38,6 @@ int		command_interpreter(int sd)
   len = read(0, buf, 512);
   if (len > 0)
     {
-      printf(">> %.*s\n", len, buf);     
       if (exec_cmd(buf, len) == 1)
 	return (1);
     }
@@ -63,12 +63,13 @@ void		getting_started()
 int		main()
 {
   int		sd;
+  int		res;
   int		saddr_size;
   int		data_size;
   struct sockaddr saddr;
   unsigned char *buffer;
   t_sniffer	sniffer;
-  //  struct fd_set	fd_read;
+  fd_set	fd_read;
 
   buffer = malloc(sizeof(unsigned char *) * 65536);
   sniffer.logfile = fopen("log.txt", "w");
@@ -89,19 +90,37 @@ int		main()
 
   while (1)
     {
-      
-      if (command_interpreter(sd) == 1)
-	break;
-      saddr_size = sizeof(saddr);
-      data_size = recvfrom(sd, buffer, 65536, 0, &saddr, (socklen_t*)&saddr_size);
-      if (data_size > 0)
+      FD_ZERO(&fd_read);
+      FD_SET(0, &fd_read);
+      FD_SET(sd, &fd_read);
+      res = select(sd + 1, &fd_read, NULL, NULL, NULL);
+      if (res < 0)
 	{
-	  ProcessPacket(buffer, data_size, &sniffer);
-	  //close(sd);
-	  //perror("recvfrom(): ");
-	  //return (EXIT_FAILURE);
+	  close(sd);
+	  perror("select(): ");
+	  return (EXIT_FAILURE);
 	}
-
+      else
+	{
+	  if (FD_ISSET(0, &fd_read))
+	    {
+	      if (command_interpreter(sd) == 1)
+		break;
+	    }
+	    else if (FD_ISSET(sd, &fd_read))
+	      {
+		saddr_size = sizeof(saddr);
+		data_size = recvfrom(sd, buffer, 65536, 0, &saddr,
+				     (socklen_t*)&saddr_size);
+		if (data_size <= 0)
+		  {
+		    close(sd);
+		    perror("recvfrom(): ");
+		    return (EXIT_FAILURE);
+		  }
+		ProcessPacket(buffer, data_size, &sniffer);
+	      }
+	}
     }
   close(sd);
   return (EXIT_SUCCESS);
