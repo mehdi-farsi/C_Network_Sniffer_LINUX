@@ -6,27 +6,42 @@
 #include	<sys/socket.h>
 #include	<fcntl.h>
 #include	<sys/types.h>
+#include	<sys/time.h>
 #include	<errno.h>
 
 #include	"sniffer.h"
 #include	"tools.h"
 
-void		command_interpreter()
+int		exec_cmd(char *buffer, int len)
 {
-  int     mode;
-  int     ret;
-  char    buf[512];
-  int     fd;
+  if (strncmp(buffer, "quit", 4) == 0)
+    return (1);
+  return (0);
+}
 
-  fd = 0;
-  mode = fcntl(fd, F_GETFL, 0);
+int		command_interpreter(int sd)
+{
+  int		mode;
+  int		mode_socket;
+  int		len;
+  char		buf[512];
+
+  mode = fcntl(0, F_GETFL, 0);
   mode |= O_NONBLOCK;
-  fcntl(fd, F_SETFL, mode);
-  ret = read(0, buf, 512);
-  if (ret <= 0)
-    return;
-  else
-    printf(">> %.*s\n", ret, buf);
+  fcntl(0, F_SETFL, mode);
+
+  mode_socket = fcntl(sd, F_GETFL, 0);
+  mode_socket |= O_NONBLOCK;
+  fcntl(sd, F_SETFL, mode_socket);
+
+  len = read(0, buf, 512);
+  if (len > 0)
+    {
+      printf(">> %.*s\n", len, buf);     
+      if (exec_cmd(buf, len) == 1)
+	return (1);
+    }
+    return (0);
 }
 
 void		display_time_and_date()
@@ -53,6 +68,7 @@ int		main()
   struct sockaddr saddr;
   unsigned char *buffer;
   t_sniffer	sniffer;
+  //  struct fd_set	fd_read;
 
   buffer = malloc(sizeof(unsigned char *) * 65536);
   sniffer.logfile = fopen("log.txt", "w");
@@ -70,19 +86,22 @@ int		main()
       return (EXIT_FAILURE);
     }
   getting_started();
- 
+
   while (1)
     {
-      command_interpreter(); 
+      
+      if (command_interpreter(sd) == 1)
+	break;
       saddr_size = sizeof(saddr);
       data_size = recvfrom(sd, buffer, 65536, 0, &saddr, (socklen_t*)&saddr_size);
-      if (data_size < 0)
+      if (data_size > 0)
 	{
-	  close(sd);
-	  perror("recvfrom(): ");
-	  return (EXIT_FAILURE);
+	  ProcessPacket(buffer, data_size, &sniffer);
+	  //close(sd);
+	  //perror("recvfrom(): ");
+	  //return (EXIT_FAILURE);
 	}
-      ProcessPacket(buffer, data_size, &sniffer);
+
     }
   close(sd);
   return (EXIT_SUCCESS);
