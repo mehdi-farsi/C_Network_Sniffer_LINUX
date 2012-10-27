@@ -10,7 +10,7 @@
 #include	<arpa/inet.h>
 
 #include	"sniffer.h"
-
+#include	"tools.h"
 
 void		print_ip_header(unsigned char *buf, int size, t_sniffer *sniffer)
 {
@@ -161,7 +161,7 @@ void		print_icmp_packet(unsigned char *buf , int size, t_sniffer *sniffer)
 void		PrintData(unsigned char *buf, int size, t_sniffer *sniffer)
 {
   int		i;
-  int		j;
+  //  int		j;
 
   for(i = 0 ; i < size ; i++)
     {

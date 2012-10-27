@@ -6,6 +6,23 @@
 #include	<sys/socket.h>
 
 #include	"sniffer.h"
+#include	"tools.h"
+
+void		display_time_and_date()
+{
+  INITCOLOR(RED_COLOR);
+  printf("[%s]", __DATE__);
+  INITCOLOR(GREEN_COLOR);
+  printf("[%s]  ", __TIME__);
+  INITCOLOR(ZERO_COLOR);
+}
+
+void		getting_started()
+{
+  CLEARSCREEN();
+  display_time_and_date();
+  printf("Getting started of Network sniffer\n\n");  
+}
 
 int		main()
 {
@@ -25,13 +42,13 @@ int		main()
       return (EXIT_FAILURE);
     }
   sniffer.prot = malloc(sizeof(t_protocol *));
-  printf("[%s][%s]  Getting started of Network sniffer\n\n", __DATE__, __TIME__);
   sd = socket(AF_INET, SOCK_RAW, IPPROTO_TCP);
   if (sd < 0)
     {
       perror("socket(): ");
       return (EXIT_FAILURE);
     }
+  getting_started();
   while (1)
     {
       saddr_size = sizeof(saddr);

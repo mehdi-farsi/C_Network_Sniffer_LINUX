@@ -24,5 +24,7 @@ void print_tcp_packet(unsigned char* , int, t_sniffer *);
 void print_udp_packet(unsigned char * , int, t_sniffer *);
 void print_icmp_packet(unsigned char* , int, t_sniffer *);
 void PrintData (unsigned char* , int, t_sniffer *);
+void		display_time_and_date();
+void		getting_started();
 
 #endif		/* __SNIFFER_H__ */
