@@ -1,3 +1,4 @@
+#include	<signal.h>
 #include	<unistd.h>
 #include	<stdio.h>
 #include	<stdlib.h>
@@ -22,18 +23,8 @@ int		exec_cmd(char *buffer, int len)
 
 int		command_interpreter(int sd)
 {
-  int		mode;
-  int		mode_socket;
   int		len;
   char		buf[512];
-
-  mode = fcntl(0, F_GETFL, 0);
-  mode |= O_NONBLOCK;
-  fcntl(0, F_SETFL, mode);
-
-  mode_socket = fcntl(sd, F_GETFL, 0);
-  mode_socket |= O_NONBLOCK;
-  fcntl(sd, F_SETFL, mode_socket);
 
   len = read(0, buf, 512);
   if (len > 0)
@@ -87,7 +78,8 @@ int		main()
       return (EXIT_FAILURE);
     }
   getting_started();
-
+  signal(SIGINT, &signal_white_now);
+  signal(SIGQUIT, &signal_white_now);
   while (1)
     {
       FD_ZERO(&fd_read);
@@ -97,7 +89,8 @@ int		main()
       if (res < 0)
 	{
 	  close(sd);
-	  perror("select(): ");
+	  if (errno != EINTR)
+	    perror("select() ");
 	  return (EXIT_FAILURE);
 	}
       else

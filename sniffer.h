@@ -26,5 +26,6 @@ void print_icmp_packet(unsigned char* , int, t_sniffer *);
 void PrintData (unsigned char* , int, t_sniffer *);
 void		display_time_and_date();
 void		getting_started();
+void		signal_white_now(int);
 
 #endif		/* __SNIFFER_H__ */

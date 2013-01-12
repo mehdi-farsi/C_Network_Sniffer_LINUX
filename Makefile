@@ -1,5 +1,6 @@
 NAME	=	network_sniffer
 SRCS	=	main.c		\
+		tools.c		\
 		show_data.c
 
 OBJS	=	$(SRCS:.c=.o)
